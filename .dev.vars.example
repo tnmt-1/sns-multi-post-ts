@@ -1,0 +1,20 @@
+# Bluesky
+BLUESKY_USERNAME=
+BLUESKY_PASSWORD=
+
+# X/Twitter
+X_API_KEY=zXIkRtfHPYKssBBg3mgUReO5j
+X_API_SECRET=xauyqrtZn4rOAqbtHhx8OW7YwfhsfeCwp6lVLc6ItPFr4aArlZ
+X_ACCESS_TOKEN=2479879333-QNMiDNM31nhPVDoKUeAiBRjL6p7wkvEICUjC1g2
+X_ACCESS_TOKEN_SECRET=P5hMIcE8tt55ZQiIc9xii29yiEBMGnEf3yWqoFbbjfgqU
+
+# Threads (via Instagram API)
+THREADS_ACCESS_TOKEN=
+
+# Misskey URLはご自身で利用しているサーバーに置き換えてください。
+MISSKEY_API_TOKEN=
+MISSKEY_INSTANCE=misskey.io
+
+# Mastodon URLはご自身で利用しているサーバーに置き換えてください。
+MASTODON_ACCESS_TOKEN=
+MASTODON_INSTANCE=mastodon.social

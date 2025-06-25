@@ -1,0 +1,30 @@
+{
+  "name": "sns-multi-post-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.2",
+  "dependencies": {
+    "@atproto/api": "^0.15.17",
+    "@types/crypto-js": "^4.2.2",
+    "hono": "^4.8.2",
+    "misskey-js": "^2025.6.3",
+    "wrangler": "^4.21.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.0.5",
+    "@cloudflare/workers-types": "^4.20250620.0",
+    "crypto-js": "^4.2.0",
+    "oauth-1.0a": "^2.2.6",
+    "typescript": "^5.8.3"
+  }
+}

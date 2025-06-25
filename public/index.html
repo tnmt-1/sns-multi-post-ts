@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SNS Poster - 複数SNS同時投稿アプリ</title>
+    <link rel="icon" href="img/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet"
+        title="light" />
+    <link rel="stylesheet" href="style_dark_hls.css" title="dark" disabled />
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>SNS Poster</h1>
+            <p>複数のSNSに同時投稿できるアプリ</p>
+            <button id="dark-mode-toggle"></button>
+        </header>
+        <main>
+            <section class="content-section">
+                <h2>投稿内容の入力</h2>
+                <div class="post-mode-toggle">
+                    <button id="unified-mode-btn" class="active">一括投稿モード</button>
+                    <button id="individual-mode-btn">個別投稿モード</button>
+                </div>
+                <div id="unified-mode" class="post-mode">
+                    <div class="textarea-container">
+                        <textarea id="unified-content" placeholder="ここに投稿内容を入力してください..." maxlength="3000"></textarea>
+                        <div class="character-count" id="unified-character-count">0 / 3000</div>
+                    </div>
+                    <div class="image-upload-info">
+                        <div id="image-preview-container" class="image-preview-flex"></div>
+                    </div>
+                    <div class="image-upload-toolbar">
+                        <input type="file" id="image-input" accept="image/*" style="display:none;" />
+                        <button type="button" id="image-upload-btn" title="画像を選択"><span class="icon"></span></button>
+                        <span id="image-filename" style="display:none;"></span>
+                        <button id="post-button" class="post-button">投稿する</button>
+                    </div>
+                </div>
+                <div id="individual-mode" class="post-mode hidden">
+                    <div id="individual-posts-container"><!-- JavaScriptで動的に生成 --></div>
+                </div>
+            </section>
+            <button id="toggle-platforms-btn" class="toggle-platforms-btn" title="投稿先を選択">⚙️</button>
+            <!-- 投稿先選択モーダル -->
+            <div id="platforms-modal" class="modal hidden">
+                <div class="modal-content">
+                    <span class="close-modal" id="close-platforms-modal">&times;</span>
+                    <h2>投稿先の選択</h2>
+                    <div class="platforms-container" id="platforms-container"><!-- JavaScriptで動的に生成 --></div>
+                </div>
+            </div>
+            <!-- トースト通知エリア -->
+            <div id="toast-container" class="toast-container"></div>
+            <section class="status-section" style="display:none;">
+                <div id="status-container" class="status-container hidden"><!-- 投稿結果をここに表示 --></div>
+            </section>
+        </main>
+        <footer class="footer-flex">
+            <p class="copyright">&copy; 2025 SNS Poster App</p>
+            <p class="fork-info">forked from <a href="https://github.com/naomina121/sns-multi-post" target="_blank"
+                    rel="noopener">naomina121/sns-multi-post</a></p>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>

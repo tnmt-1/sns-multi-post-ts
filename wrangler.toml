@@ -1,0 +1,7 @@
+assets = {directory = "public"}
+compatibility_date = "2025-06-24"
+main = "src/index.ts"
+name = "sns-multi-post-ts"
+
+[build]
+command = "pnpm run build"
