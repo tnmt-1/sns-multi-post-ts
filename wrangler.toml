@@ -5,3 +5,6 @@ name = "sns-multi-post-ts"
 
 [build]
 command = "pnpm run build"
+
+[observability]
+enabled = true
