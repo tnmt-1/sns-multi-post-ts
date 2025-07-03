@@ -25,7 +25,7 @@ export async function postToMastodon({
       // visibility, sensitive, etc. 必要に応じて追加
     }),
   });
-  console.log("Mastodon投稿レスポンス:", res);
+  console.log("Mastodon投稿レスポンス:", JSON.stringify(res));
 
   if (!res.ok) {
     const errorText = await res.text();
