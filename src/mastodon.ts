@@ -29,8 +29,11 @@ export async function postToMastodon({
 
   if (!res.ok) {
     const errorText = await res.text();
-    console.error("Mastodon投稿エラー:", errorText);
-    return { success: false, message: "Mastodon投稿失敗: " + errorText };
+    console.error("Mastodon投稿エラー:", JSON.stringify(errorText));
+    return {
+      success: false,
+      message: "Mastodon投稿失敗: " + JSON.stringify(errorText),
+    };
   }
 
   if (!res.ok) {

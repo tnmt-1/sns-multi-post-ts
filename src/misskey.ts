@@ -23,7 +23,7 @@ export async function postToMisskey({
         // CW, localOnly, etc. 必要に応じて追加
       }),
     });
-    console.log("Misskey投稿レスポンス:", res);
+    console.log("Misskey投稿レスポンス:", JSON.stringify(res));
 
     if (!res.ok) {
       return { success: false, message: "Misskey投稿失敗" };

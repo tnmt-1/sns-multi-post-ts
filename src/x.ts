@@ -46,12 +46,12 @@ export async function postToX({
     },
     body: JSON.stringify({ text }),
   });
-  console.log("X投稿レスポンス:", res);
+  console.log("X投稿レスポンス:", JSON.stringify(res));
 
   if (!res.ok) {
     const err = await res.text();
-    console.error("X投稿エラー詳細:", err);
-    return { success: false, message: `X投稿失敗: ${err}` };
+    console.error("X投稿エラー詳細:", JSON.stringify(err));
+    return { success: false, message: `X投稿失敗: ${JSON.stringify(err)}` };
   }
   return { success: true, message: "X投稿成功" };
 }

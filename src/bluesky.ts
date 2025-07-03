@@ -23,7 +23,7 @@ export async function postToBluesky({
       text,
       createdAt: new Date().toISOString(),
     });
-    console.log("Bluesky投稿成功:", postRes);
+    console.log("Bluesky投稿成功:", JSON.stringify(postRes));
 
     return { success: true, message: "Bluesky投稿成功" };
   } catch (e: any) {
