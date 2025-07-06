@@ -10,8 +10,25 @@ interface ModalProps {
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
   if (!isOpen) return null;
 
+  // overlayクリックで閉じる
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      onClick={handleOverlayClick}
+      role="none"
+      tabIndex={-1}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          onClose();
+        }
+      }}
+    >
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-lg w-full mx-4 relative">
         <button
           type="button"
