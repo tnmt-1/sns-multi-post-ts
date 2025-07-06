@@ -4,6 +4,7 @@ import { useApi } from "./components/hooks/useApi";
 import { useToast } from "./components/hooks/useToast";
 import PlatformSelector from "./components/PlatformSelector";
 import PostForm from "./components/PostForm";
+import Modal from "./components/Modal"; // Import the new Modal component
 
 const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -11,6 +12,7 @@ const App: React.FC = () => {
     return savedMode === "true"; // Default to light mode if no saved preference
   });
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [isPlatformModalOpen, setIsPlatformModalOpen] = useState<boolean>(false); // State for modal visibility
   const { showToast, ToastContainer } = useToast();
 
   useEffect(() => {
@@ -77,16 +79,30 @@ const App: React.FC = () => {
           </button>
         </header>
         <main>
-          <PlatformSelector
-            platforms={platforms}
-            selectedPlatforms={selectedPlatforms}
-            onPlatformToggle={handlePlatformToggle}
-          />
+          <button
+            onClick={() => setIsPlatformModalOpen(true)}
+            className="mb-4 px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300"
+          >
+            投稿先SNSを選択
+          </button>
+
           <PostForm
             selectedPlatforms={selectedPlatforms}
             characterLimits={characterLimits}
             showToast={showToast}
           />
+
+          <Modal
+            isOpen={isPlatformModalOpen}
+            onClose={() => setIsPlatformModalOpen(false)}
+            title="投稿先SNSを選択"
+          >
+            <PlatformSelector
+              platforms={platforms}
+              selectedPlatforms={selectedPlatforms}
+              onPlatformToggle={handlePlatformToggle}
+            />
+          </Modal>
         </main>
       </div>
       <ToastContainer />
