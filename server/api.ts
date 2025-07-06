@@ -1,20 +1,22 @@
+import manifest from "__STATIC_CONTENT_MANIFEST";
 import { Hono } from "hono";
+import { serveStatic } from "hono/cloudflare-workers";
 import { cors } from "hono/cors";
 import { postToBluesky } from "./bluesky";
+import { CHARACTER_LIMITS, type Platform } from "./constants";
 import { postToMastodon } from "./mastodon";
 import { postToMisskey } from "./misskey";
 import type { Env } from "./types";
 import { postToX } from "./x";
 
 const app = new Hono<{ Bindings: Env }>();
+const api = new Hono<{ Bindings: Env }>();
 
 // CORS有効化
-app.use("*", cors());
+api.use("*", cors());
 
-// SNSプラットフォーム情報（ダミー）
-import { CHARACTER_LIMITS, type Platform } from "./constants";
-
-app.get("/api/platforms", (c) => {
+// SNSプラットフォーム情報
+api.get("/platforms", (c) => {
   const env = c.env as Env;
   const platforms = Object.fromEntries(
     (Object.keys(CHARACTER_LIMITS) as Platform[]).map((platform) => {
@@ -45,12 +47,12 @@ app.get("/api/platforms", (c) => {
   return c.json(platforms);
 });
 
-app.get("/api/character-limits", (c) => {
+api.get("/character-limits", (c) => {
   return c.json(CHARACTER_LIMITS);
 });
 
 // SNS投稿API
-app.post("/api/post", async (c) => {
+api.post("/post", async (c) => {
   // multipart/form-data or application/json
   let data: Record<string, { selected?: boolean; content?: string }> | null =
     null;
@@ -241,5 +243,11 @@ app.post("/api/post", async (c) => {
   const status = all_success ? 200 : 400;
   return c.json({ success: all_success, results }, status);
 });
+
+app.route("/api", api);
+
+// Serve static files
+app.use("/*", serveStatic({ root: "./", manifest }));
+app.get("/", serveStatic({ path: "./index.html", manifest }));
 
 export default app;
