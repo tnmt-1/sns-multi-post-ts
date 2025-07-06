@@ -19,7 +19,7 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
   const id = React.useId();
 
   return (
-    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md mb-8">
+    <div className="bg-white p-6 rounded-lg shadow-md mb-8">
       <div
         id={`platforms-container-${id}`}
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
@@ -32,9 +32,9 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
               ${
                 info.enabled
                   ? selectedPlatforms.includes(platform)
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20 cursor-pointer"
-                    : "border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-600 cursor-pointer"
-                  : "border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 opacity-60 cursor-not-allowed"
+                    ? "border-blue-500 bg-blue-50 cursor-pointer"
+                    : "border-gray-300 hover:border-blue-400 cursor-pointer"
+                  : "border-gray-200 bg-gray-100 opacity-60 cursor-not-allowed"
               }`}
             onClick={() => info.enabled && onPlatformToggle(platform)}
             onKeyDown={(e) => {
@@ -53,7 +53,7 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
             <div className="platform-status text-sm mt-1">
               {info.enabled ? "連携済み" : "未連携"}
             </div>
-            <div className="platform-limit text-sm text-gray-600 dark:text-gray-400 mt-1">
+            <div className="platform-limit text-sm text-gray-600 mt-1">
               最大 {info.limit} 文字
             </div>
           </button>

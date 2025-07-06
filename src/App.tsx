@@ -7,27 +7,11 @@ import PlatformSelector from "./components/PlatformSelector";
 import PostForm from "./components/PostForm";
 
 const App: React.FC = () => {
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
-    const savedMode = localStorage.getItem("darkMode");
-    return savedMode === "true"; // Default to light mode if no saved preference
-  });
+  // ダーク/ライト切り替え機能を削除
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [isPlatformModalOpen, setIsPlatformModalOpen] =
     useState<boolean>(false); // State for modal visibility
   const { showToast, ToastContainer } = useToast();
-
-  useEffect(() => {
-    if (isDarkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem("darkMode", String(isDarkMode));
-  }, [isDarkMode]);
-
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
 
   const { platforms, characterLimits, loading, error } = useApi();
 
@@ -53,7 +37,7 @@ const App: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 text-gray-900 flex items-center justify-center">
         <p className="text-xl">Loading...</p>
       </div>
     );
@@ -61,24 +45,17 @@ const App: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-red-500 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 text-red-500 flex items-center justify-center">
         <p className="text-xl">Error: {error}</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <div className="min-h-screen bg-gray-100 text-gray-900 transition-colors duration-300">
       <div className="container mx-auto p-4">
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">SNS Poster</h1>
-          <button
-            type="button"
-            onClick={toggleDarkMode}
-            className="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
-          >
-            {isDarkMode ? "ライトモードへ切替" : "ダークモードへ切替"}
-          </button>
         </header>
         <main>
           <button
