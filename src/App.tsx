@@ -2,9 +2,9 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { useApi } from "./components/hooks/useApi";
 import { useToast } from "./components/hooks/useToast";
+import Modal from "./components/Modal"; // Import the new Modal component
 import PlatformSelector from "./components/PlatformSelector";
 import PostForm from "./components/PostForm";
-import Modal from "./components/Modal"; // Import the new Modal component
 
 const App: React.FC = () => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
@@ -12,7 +12,8 @@ const App: React.FC = () => {
     return savedMode === "true"; // Default to light mode if no saved preference
   });
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [isPlatformModalOpen, setIsPlatformModalOpen] = useState<boolean>(false); // State for modal visibility
+  const [isPlatformModalOpen, setIsPlatformModalOpen] =
+    useState<boolean>(false); // State for modal visibility
   const { showToast, ToastContainer } = useToast();
 
   useEffect(() => {
@@ -72,6 +73,7 @@ const App: React.FC = () => {
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">SNS Poster</h1>
           <button
+            type="button"
             onClick={toggleDarkMode}
             className="px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"
           >
@@ -80,6 +82,7 @@ const App: React.FC = () => {
         </header>
         <main>
           <button
+            type="button"
             onClick={() => setIsPlatformModalOpen(true)}
             className="mb-4 px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300"
           >

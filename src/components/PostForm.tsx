@@ -1,5 +1,5 @@
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { postContent } from "./hooks/useApi";
 
 interface PostFormProps {
@@ -9,6 +9,35 @@ interface PostFormProps {
     message: string,
     options?: { type?: "success" | "error" | "info"; duration?: number },
   ) => void;
+}
+
+interface PostResult {
+  platform: string;
+  success: boolean;
+  error?: string;
+  message?: string;
+}
+
+interface ResultSummary {
+  success: boolean;
+  results: {
+    [platform: string]: {
+      success: boolean;
+      error: string | null;
+    };
+  };
+}
+
+interface ResultSummaryResults {
+  [platform: string]: {
+    success: boolean;
+    error: string | null;
+  };
+}
+
+interface ResultSummaryTyped {
+  success: boolean;
+  results: ResultSummaryResults;
 }
 
 const PostForm: React.FC<PostFormProps> = ({
@@ -24,6 +53,10 @@ const PostForm: React.FC<PostFormProps> = ({
   const [selectedImageFiles, setSelectedImageFiles] = useState<File[]>([]);
   const [isPosting, setIsPosting] = useState<boolean>(false);
   const unifiedContentRef = useRef<HTMLTextAreaElement>(null);
+  const unifiedModeId = useId();
+  const individualModeId = useId();
+  const imageInputId = useId();
+  const postButtonId = useId();
 
   // unifiedContentの変更をindividualContentsに同期
   useEffect(() => {
@@ -91,7 +124,7 @@ const PostForm: React.FC<PostFormProps> = ({
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-    if (e.clipboardData && e.clipboardData.items) {
+    if (e.clipboardData?.items) {
       for (const item of e.clipboardData.items) {
         if (item.type.startsWith("image/")) {
           const file = item.getAsFile();
@@ -137,12 +170,14 @@ const PostForm: React.FC<PostFormProps> = ({
         postDataPerPlatform,
         selectedImageFiles,
       );
-      const resultSummary = {
-        success: results.every((r) => r.success),
+
+      const resultSummary: ResultSummaryTyped = {
+        success: (results as PostResult[]).every((r: PostResult) => r.success),
         results: {},
       };
-      results.forEach((r) => {
-        resultSummary.results[r.platform] = {
+
+      (results as PostResult[]).forEach((r: PostResult) => {
+        (resultSummary as ResultSummary).results[r.platform] = {
           success: r.success,
           error: r.error || r.message || null,
         };
@@ -196,24 +231,25 @@ const PostForm: React.FC<PostFormProps> = ({
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
       <div className="flex mb-4">
         <button
+          type="button"
           className={`px-4 py-2 rounded-l-md ${postMode === "unified" ? "bg-blue-500 text-white" : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"}`}
           onClick={() => setPostMode("unified")}
         >
           一括投稿
         </button>
         <button
+          type="button"
           className={`px-4 py-2 rounded-r-md ${postMode === "individual" ? "bg-blue-500 text-white" : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200"}`}
           onClick={() => setPostMode("individual")}
         >
           個別投稿
         </button>
       </div>
-
       {postMode === "unified" && (
-        <div id="unified-mode">
+        <div id={unifiedModeId}>
           <textarea
             ref={unifiedContentRef}
-            id="unified-content"
+            id={`${unifiedModeId}-content`}
             className="w-full p-3 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={6}
             placeholder="投稿内容を入力..."
@@ -228,9 +264,8 @@ const PostForm: React.FC<PostFormProps> = ({
           </div>
         </div>
       )}
-
       {postMode === "individual" && (
-        <div id="individual-mode">
+        <div id={individualModeId}>
           {selectedPlatforms.length === 0 ? (
             <p className="text-gray-600 dark:text-gray-400">
               投稿先のSNSを選択してください
@@ -278,32 +313,31 @@ const PostForm: React.FC<PostFormProps> = ({
           )}
         </div>
       )}
-
-      <div className="mt-4">
         <input
           type="file"
-          id="image-input"
+          id={imageInputId}
           accept="image/*"
           multiple
           onChange={handleImageChange}
           className="hidden"
         />
         <button
-          onClick={() => document.getElementById("image-input")?.click()}
+          type="button"
+          onClick={() => document.getElementById(imageInputId)?.click()}
           className="px-4 py-2 rounded-md bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
         >
           画像を選択 (最大2枚)
         </button>
         <div
-          id="image-filename"
+          id={`${imageInputId}-filename`}
           className="text-sm text-gray-600 dark:text-gray-400 mt-2"
         >
           {selectedImageFiles.map((file) => file.name).join(", ")}
         </div>
-        <div id="image-preview-container" className="flex flex-wrap gap-2 mt-2">
+        <div id={`${imageInputId}-preview-container`} className="flex flex-wrap gap-2 mt-2">
           {selectedImageFiles.map((file, index) => (
             <div
-              key={index}
+              key={`${file.name}-${file.lastModified}`}
               className="image-preview-item relative w-24 h-24 border border-gray-300 rounded-md overflow-hidden"
             >
               <img
@@ -321,11 +355,10 @@ const PostForm: React.FC<PostFormProps> = ({
             </div>
           ))}
         </div>
-      </div>
-
       <button
+        type="button"
         onClick={handleSubmit}
-        id="post-button"
+        id={postButtonId}
         className="w-full mt-6 px-4 py-3 rounded-md bg-blue-600 text-white text-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         disabled={isPosting}
       >
