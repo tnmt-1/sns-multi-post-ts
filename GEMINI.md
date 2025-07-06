@@ -7,7 +7,7 @@
 - フロントエンド: React, TypeScript, Vite
 - バックエンド: Node.js, Hono
 - スタイリング: Tailwind CSS
-- リンター, フォーマッター: Biome
+- リンター, フォーマッター: Biome v2
 - インフラ: Cloudflare Workers
 - ツール: pnpm, mise
 

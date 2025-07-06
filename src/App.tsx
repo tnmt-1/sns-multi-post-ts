@@ -56,16 +56,16 @@ const App: React.FC = () => {
       <div className="container mx-auto p-4">
         <header className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">SNS Poster</h1>
-        </header>
-        <main>
           <button
             type="button"
             onClick={() => setIsPlatformModalOpen(true)}
-            className="mb-4 px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors duration-300"
+            className="p-2 rounded-full bg-transparent text-gray-300 transition-colors duration-300"
+            title="投稿先SNSを選択"
           >
-            投稿先SNSを選択
+            ⚙️
           </button>
-
+        </header>
+        <main>
           <PostForm
             selectedPlatforms={selectedPlatforms}
             characterLimits={characterLimits}

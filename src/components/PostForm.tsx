@@ -131,7 +131,9 @@ const PostForm: React.FC<PostFormProps> = ({
           const file = item.getAsFile();
           if (file && selectedImageFiles.length < 4) {
             compressImage(file).then((compressed) => {
-              setSelectedImageFiles((prev) => [...prev, compressed].slice(0, 4));
+              setSelectedImageFiles((prev) =>
+                [...prev, compressed].slice(0, 4),
+              );
             });
           }
           e.preventDefault();
@@ -235,7 +237,11 @@ const PostForm: React.FC<PostFormProps> = ({
   };
 
   // 画像圧縮ユーティリティ
-  async function compressImage(file: File, maxSize = 1280, quality = 0.8): Promise<File> {
+  async function compressImage(
+    file: File,
+    maxSize = 1280,
+    quality = 0.8,
+  ): Promise<File> {
     return new Promise((resolve) => {
       const img = new window.Image();
       const url = URL.createObjectURL(file);
@@ -301,7 +307,7 @@ const PostForm: React.FC<PostFormProps> = ({
           <textarea
             ref={unifiedContentRef}
             id={`${unifiedModeId}-content`}
-            className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-3 border border-gray-300 rounded-md bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
             rows={6}
             placeholder="投稿内容を入力..."
             value={unifiedContent}
@@ -318,9 +324,7 @@ const PostForm: React.FC<PostFormProps> = ({
       {postMode === "individual" && (
         <div id={individualModeId}>
           {selectedPlatforms.length === 0 ? (
-            <p className="text-gray-600">
-              投稿先のSNSを選択してください
-            </p>
+            <p className="text-gray-600">投稿先のSNSを選択してください</p>
           ) : (
             selectedPlatforms.map((platform) => {
               const limit = characterLimits[platform];
@@ -342,7 +346,7 @@ const PostForm: React.FC<PostFormProps> = ({
                   </div>
                   <div className="textarea-container">
                     <textarea
-                      className="w-full p-3 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full p-3 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
                       rows={4}
                       placeholder={`${displayName}に投稿する内容を入力...`}
                       value={content}
@@ -365,53 +369,56 @@ const PostForm: React.FC<PostFormProps> = ({
           )}
         </div>
       )}
-        <input
-          type="file"
-          id={imageInputId}
-          accept="image/*"
-          multiple
-          onChange={handleImageChange}
-          className="hidden"
-        />
-        <button
-          type="button"
-          onClick={() => document.getElementById(imageInputId)?.click()}
-          className="px-4 py-2 rounded-md bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-        >
-          画像を選択 (最大4枚)
-        </button>
-        <div
-          id={`${imageInputId}-filename`}
-          className="text-sm text-gray-600 mt-2"
-        >
-          {selectedImageFiles.map((file) => file.name).join(", ")}
-        </div>
-        <div id={`${imageInputId}-preview-container`} className="flex flex-wrap gap-2 mt-2">
-          {selectedImageFiles.map((file, index) => (
-            <div
-              key={`${file.name}-${file.lastModified}`}
-              className="image-preview-item relative w-24 h-24 border border-gray-300 rounded-md overflow-hidden"
+      <input
+        type="file"
+        id={imageInputId}
+        accept="image/*"
+        multiple
+        onChange={handleImageChange}
+        className="hidden"
+      />
+      <button
+        type="button"
+        onClick={() => document.getElementById(imageInputId)?.click()}
+        className="px-4 py-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+      >
+        画像を選択 (最大4枚)
+      </button>
+      <div
+        id={`${imageInputId}-filename`}
+        className="text-sm text-gray-600 mt-2"
+      >
+        {selectedImageFiles.map((file) => file.name).join(", ")}
+      </div>
+      <div
+        id={`${imageInputId}-preview-container`}
+        className="flex flex-wrap gap-2 mt-2"
+      >
+        {selectedImageFiles.map((file, index) => (
+          <div
+            key={`${file.name}-${file.lastModified}`}
+            className="image-preview-item relative w-24 h-24 border border-gray-300 rounded-md overflow-hidden"
+          >
+            <img
+              src={URL.createObjectURL(file)}
+              alt={`preview-${index}`}
+              className="w-full h-full object-cover"
+            />
+            <button
+              type="button"
+              className="image-remove-btn absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
+              onClick={() => handleImageRemove(index)}
             >
-              <img
-                src={URL.createObjectURL(file)}
-                alt={`preview-${index}`}
-                className="w-full h-full object-cover"
-              />
-              <button
-                type="button"
-                className="image-remove-btn absolute top-0 right-0 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
-                onClick={() => handleImageRemove(index)}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
+              ✕
+            </button>
+          </div>
+        ))}
+      </div>
       <button
         type="button"
         onClick={handleSubmit}
         id={postButtonId}
-        className="w-full mt-6 px-4 py-3 rounded-md bg-blue-600 text-white text-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="w-full mt-6 px-4 py-3 rounded-md bg-blue-500 text-white text-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
         disabled={isPosting}
       >
         {isPosting ? "投稿中..." : "投稿する"}
