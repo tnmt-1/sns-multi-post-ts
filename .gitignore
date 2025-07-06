@@ -1,4 +1,10 @@
+# General
 node_modules/
-dist/
 .wrangler/
 .dev.vars
+
+# Backend (Wrangler)
+dist/
+
+# Frontend (Vite)
+.vite/

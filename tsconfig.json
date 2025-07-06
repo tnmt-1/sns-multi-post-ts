@@ -8,6 +8,8 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
     "types": ["@cloudflare/workers-types"]
   },
   "include": ["src"],

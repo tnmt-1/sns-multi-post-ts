@@ -3,25 +3,8 @@ import { cors } from "hono/cors";
 import { postToBluesky } from "./bluesky";
 import { postToMastodon } from "./mastodon";
 import { postToMisskey } from "./misskey";
+import type { Env } from "./types";
 import { postToX } from "./x";
-
-// Cloudflare Workersの環境変数型定義
-type Env = {
-  // Bluesky
-  BLUESKY_USERNAME?: string;
-  BLUESKY_PASSWORD?: string;
-  // X/Twitter
-  X_API_KEY?: string;
-  X_API_SECRET?: string;
-  X_ACCESS_TOKEN?: string;
-  X_ACCESS_TOKEN_SECRET?: string;
-  // Misskey
-  MISSKEY_API_TOKEN?: string;
-  MISSKEY_INSTANCE?: string;
-  // Mastodon
-  MASTODON_ACCESS_TOKEN?: string;
-  MASTODON_INSTANCE?: string;
-};
 
 const app = new Hono<{ Bindings: Env }>();
 
@@ -29,14 +12,7 @@ const app = new Hono<{ Bindings: Env }>();
 app.use("*", cors());
 
 // SNSプラットフォーム情報（ダミー）
-const CHARACTER_LIMITS = {
-  bluesky: 300,
-  x: 280,
-  misskey: 3000,
-  mastodon: 500,
-} as const;
-
-type Platform = keyof typeof CHARACTER_LIMITS;
+import { CHARACTER_LIMITS, type Platform } from "./constants";
 
 app.get("/api/platforms", (c) => {
   const env = c.env as Env;
@@ -69,7 +45,7 @@ app.get("/api/platforms", (c) => {
   return c.json(platforms);
 });
 
-app.get("/api/character_limits", (c) => {
+app.get("/api/character-limits", (c) => {
   return c.json(CHARACTER_LIMITS);
 });
 
@@ -98,68 +74,75 @@ app.post("/api/post", async (c) => {
   }
 
   const env = c.env as Env;
-  const results: Record<Platform, { success: boolean; message: string }> =
-    {} as any;
+  const results: Record<string, { success: boolean; message: string }> = {};
 
-  // Bluesky
-  if (data.bluesky?.selected) {
-    if (!env.BLUESKY_USERNAME || !env.BLUESKY_PASSWORD) {
-      results.bluesky = { success: false, message: "Bluesky認証情報未設定" };
-    } else {
-      results.bluesky = await postToBluesky({
+  const platformConfigs = [
+    {
+      id: "bluesky",
+      enabled: data.bluesky?.selected,
+      creds: [env.BLUESKY_USERNAME, env.BLUESKY_PASSWORD],
+      post: postToBluesky,
+      args: {
         identifier: env.BLUESKY_USERNAME,
         password: env.BLUESKY_PASSWORD,
-        text: data.bluesky.content,
+        text: data.bluesky?.content,
         images,
-      });
-    }
-  }
-
-  // Misskey
-  if (data.misskey?.selected) {
-    if (!env.MISSKEY_API_TOKEN || !env.MISSKEY_INSTANCE) {
-      results.misskey = { success: false, message: "Misskey認証情報未設定" };
-    } else {
-      results.misskey = await postToMisskey({
+      },
+    },
+    {
+      id: "misskey",
+      enabled: data.misskey?.selected,
+      creds: [env.MISSKEY_API_TOKEN, env.MISSKEY_INSTANCE],
+      post: postToMisskey,
+      args: {
         instance: env.MISSKEY_INSTANCE,
         token: env.MISSKEY_API_TOKEN,
-        text: data.misskey.content,
+        text: data.misskey?.content,
         images,
-      });
-    }
-  }
-
-  // Mastodon
-  if (data.mastodon?.selected) {
-    if (!env.MASTODON_ACCESS_TOKEN || !env.MASTODON_INSTANCE) {
-      results.mastodon = { success: false, message: "Mastodon認証情報未設定" };
-    } else {
-      results.mastodon = await postToMastodon({
+      },
+    },
+    {
+      id: "mastodon",
+      enabled: data.mastodon?.selected,
+      creds: [env.MASTODON_ACCESS_TOKEN, env.MASTODON_INSTANCE],
+      post: postToMastodon,
+      args: {
         instance: env.MASTODON_INSTANCE,
         token: env.MASTODON_ACCESS_TOKEN,
-        text: data.mastodon.content,
+        text: data.mastodon?.content,
         images,
-      });
-    }
-  }
-
-  // X（旧Twitter）
-  if (data.x?.selected) {
-    if (
-      !env.X_API_KEY ||
-      !env.X_API_SECRET ||
-      !env.X_ACCESS_TOKEN ||
-      !env.X_ACCESS_TOKEN_SECRET
-    ) {
-      results.x = { success: false, message: "X認証情報未設定" };
-    } else {
-      results.x = await postToX({
+      },
+    },
+    {
+      id: "x",
+      enabled: data.x?.selected,
+      creds: [
+        env.X_API_KEY,
+        env.X_API_SECRET,
+        env.X_ACCESS_TOKEN,
+        env.X_ACCESS_TOKEN_SECRET,
+      ],
+      post: postToX,
+      args: {
         apiKey: env.X_API_KEY,
         apiSecret: env.X_API_SECRET,
         accessToken: env.X_ACCESS_TOKEN,
         accessTokenSecret: env.X_ACCESS_TOKEN_SECRET,
-        text: data.x.content,
-      });
+        text: data.x?.content,
+      },
+    },
+  ];
+
+  for (const config of platformConfigs) {
+    if (config.enabled) {
+      if (config.creds.some((cred) => !cred)) {
+        results[config.id] = {
+          success: false,
+          message: `${config.id}認証情報未設定`,
+        };
+      } else {
+        results[config.id] = await config.post(config.args as any);
+      }
     }
   }
 

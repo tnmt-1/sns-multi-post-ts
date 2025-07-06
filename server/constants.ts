@@ -1,11 +1,13 @@
 // SNSごとの文字数・画像数制限などの定数
 
-export const CHARACTER_LIMITS: Record<string, number> = {
+export const CHARACTER_LIMITS = {
   bluesky: 300,
   x: 280,
   misskey: 3000,
   mastodon: 500,
-};
+} as const;
+
+export type Platform = keyof typeof CHARACTER_LIMITS;
 
 export const IMAGE_LIMITS: Record<string, any> = {
   bluesky: {

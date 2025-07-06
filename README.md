@@ -1,9 +1,14 @@
 # SNS Multi Post TypeScript (Cloudflare Workers + Hono)
 
-このディレクトリはCloudflare Workers無料枠で動作するTypeScript + Hono構成のAPIサーバです。
+このリポジトリは、SNSへのマルチポストを行うWebアプリケーションのソースコードです。
+フロントエンドとバックエンドを含むモノレポ構成になっています。
+
+- `server/`: バックエンドAPI (Cloudflare Workers + Hono)
+- `src/`: フロントエンド (React + Vite)
 
 ## 特徴
 
+- **モノレポ構成**: フロントエンドとバックエンドを単一リポジトリで管理
 - TypeScript + Hono (超高速Webフレームワーク)
 - Docker不要
 - pnpmで依存管理
@@ -11,7 +16,7 @@
 - wranglerでCloudflare Workersへコマンドデプロイ
 - CORS対応済み
 
-## セットアップ
+## セットアップ (バックエンド)
 
 ### 1. Node.jsのインストール (mise推奨)
 
