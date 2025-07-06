@@ -20,13 +20,13 @@
 
 - `src/`: フロントエンドのソースコード
   - `components/`: 再利用可能な React コンポーネント
-  - `pages/`: 各ページのコンポーネント
 - `server/`: バックエンドのソースコード
 - `tests/`: テストコード
 
 # コマンド
 
-- `pnpm run dev`: 開発サーバーを起動します。
+- `pnpm run dev:front`: フロントエンドの開発サーバーを起動します。
+- `pnpm run dev:back`: バックエンドの開発サーバーを起動します。
 - `pnpm run build`: プロダクション用にビルドします。
 - `pnpm test`: テストを実行します。
 - `pnpm deploy`: Cloudeflare にデプロイします。

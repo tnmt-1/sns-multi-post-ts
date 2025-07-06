@@ -52,7 +52,8 @@ app.get("/api/character-limits", (c) => {
 // SNS投稿API
 app.post("/api/post", async (c) => {
   // multipart/form-data or application/json
-  let data: any;
+  let data: Record<string, { selected?: boolean; content?: string }> | null =
+    null;
   const images: Blob[] = [];
   if (c.req.header("content-type")?.startsWith("multipart/form-data")) {
     const form = await c.req.formData();
@@ -65,6 +66,9 @@ app.post("/api/post", async (c) => {
       if (!img) break;
       if (img instanceof Blob) images.push(img);
       i++;
+    }
+    if (images.length > 4) {
+      return c.json({ success: false, error: "画像は最大4枚までです" }, 400);
     }
   } else {
     data = await c.req.json();
@@ -133,6 +137,7 @@ app.post("/api/post", async (c) => {
     },
   ];
 
+  // 各SNSごとに型安全に投稿関数を呼び出す
   for (const config of platformConfigs) {
     if (config.enabled) {
       if (config.creds.some((cred) => !cred)) {
@@ -140,14 +145,101 @@ app.post("/api/post", async (c) => {
           success: false,
           message: `${config.id}認証情報未設定`,
         };
-      } else {
-        results[config.id] = await config.post(config.args as any);
+      } else if (config.id === "bluesky") {
+        const { identifier, password, text, images } = config.args as {
+          identifier: string;
+          password: string;
+          text: string;
+          images: Blob[];
+        };
+        if (identifier && password && typeof text === "string") {
+          results[config.id] = await postToBluesky({
+            identifier,
+            password,
+            text,
+            images,
+          });
+        } else {
+          results[config.id] = {
+            success: false,
+            message: "blueskyパラメータ不正",
+          };
+        }
+      } else if (config.id === "misskey") {
+        const { instance, token, text, images } = config.args as {
+          instance: string;
+          token: string;
+          text: string;
+          images: Blob[];
+        };
+        if (instance && token && typeof text === "string") {
+          results[config.id] = await postToMisskey({
+            instance,
+            token,
+            text,
+            images,
+          });
+        } else {
+          results[config.id] = {
+            success: false,
+            message: "misskeyパラメータ不正",
+          };
+        }
+      } else if (config.id === "mastodon") {
+        const { instance, token, text, images } = config.args as {
+          instance: string;
+          token: string;
+          text: string;
+          images: Blob[];
+        };
+        if (instance && token && typeof text === "string") {
+          results[config.id] = await postToMastodon({
+            instance,
+            token,
+            text,
+            images,
+          });
+        } else {
+          results[config.id] = {
+            success: false,
+            message: "mastodonパラメータ不正",
+          };
+        }
+      } else if (config.id === "x") {
+        const { apiKey, apiSecret, accessToken, accessTokenSecret, text } =
+          config.args as {
+            apiKey: string;
+            apiSecret: string;
+            accessToken: string;
+            accessTokenSecret: string;
+            text: string;
+            images?: Blob[];
+          };
+        if (
+          apiKey &&
+          apiSecret &&
+          accessToken &&
+          accessTokenSecret &&
+          typeof text === "string"
+        ) {
+          results[config.id] = await postToX({
+            apiKey,
+            apiSecret,
+            accessToken,
+            accessTokenSecret,
+            text,
+            images: images,
+          });
+        } else {
+          results[config.id] = { success: false, message: "xパラメータ不正" };
+        }
       }
     }
   }
 
   const all_success = Object.values(results).every((r) => r.success);
-  return c.json({ success: all_success, results });
+  const status = all_success ? 200 : 400;
+  return c.json({ success: all_success, results }, status);
 });
 
 export default app;

@@ -49,10 +49,12 @@ export const postContent = async (
   selectedImageFiles: File[],
 ) => {
   const fetchPromises = selectedPlatforms.map(async (platform) => {
-    if (selectedImageFiles.length > 0) {
+    // 画像が1枚以上ある場合のみmultipart/form-dataで送信
+    const hasImage = selectedImageFiles.length > 0;
+    if (hasImage) {
       const formData = new FormData();
       selectedImageFiles.forEach((file, idx) => {
-        formData.append("image" + (idx + 1), file);
+        formData.append(`image${idx}`, file);
       });
       const singlePostData = {
         [platform]: {
@@ -65,7 +67,12 @@ export const postContent = async (
         method: "POST",
         body: formData,
       });
-      const result = await response.json();
+      let result: Record<string, unknown> = {};
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
       return { platform, success: response.ok, ...result };
     } else {
       const singlePostData = {
@@ -81,7 +88,12 @@ export const postContent = async (
         },
         body: JSON.stringify(singlePostData),
       });
-      const result = await response.json();
+      let result: Record<string, unknown> = {};
+      try {
+        result = await response.json();
+      } catch {
+        result = {};
+      }
       return { platform, success: response.ok, ...result };
     }
   });
@@ -101,8 +113,8 @@ export const useApi = () => {
         const { platforms, characterLimits } = await fetchPlatformsAndLimits();
         setPlatforms(platforms);
         setCharacterLimits(characterLimits);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }

@@ -105,16 +105,17 @@ const PostForm: React.FC<PostFormProps> = ({
 
   const unifiedCharLimit = getUnifiedCharLimit();
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
       const newFiles = [...selectedImageFiles];
-      files.forEach((file) => {
-        if (newFiles.length < 2) {
-          newFiles.push(file);
+      for (const file of files) {
+        if (newFiles.length < 4) {
+          const compressed = await compressImage(file);
+          newFiles.push(compressed);
         }
-      });
-      setSelectedImageFiles(newFiles);
+      }
+      setSelectedImageFiles(newFiles.slice(0, 4));
       e.target.value = ""; // 同じファイルを再度選択できるようにクリア
     }
   };
@@ -128,8 +129,10 @@ const PostForm: React.FC<PostFormProps> = ({
       for (const item of e.clipboardData.items) {
         if (item.type.startsWith("image/")) {
           const file = item.getAsFile();
-          if (file && selectedImageFiles.length < 2) {
-            setSelectedImageFiles((prev) => [...prev, file]);
+          if (file && selectedImageFiles.length < 4) {
+            compressImage(file).then((compressed) => {
+              setSelectedImageFiles((prev) => [...prev, compressed].slice(0, 4));
+            });
           }
           e.preventDefault();
           break;
@@ -147,22 +150,22 @@ const PostForm: React.FC<PostFormProps> = ({
 
       const postDataPerPlatform: { [key: string]: string } = {};
       if (postMode === "unified") {
-        if (!unifiedContent.trim()) {
-          throw new Error("投稿内容を入力してください");
+        if (!unifiedContent.trim() && selectedImageFiles.length === 0) {
+          throw new Error("投稿内容または画像を入力してください");
         }
         selectedPlatforms.forEach((platform) => {
           postDataPerPlatform[platform] = unifiedContent;
         });
       } else {
+        let hasContentOrImage = false;
         selectedPlatforms.forEach((platform) => {
           const content = individualContents[platform] || "";
-          if (!content.trim()) {
-            throw new Error(
-              `${platform.charAt(0).toUpperCase() + platform.slice(1)}の投稿内容を入力してください`,
-            );
-          }
+          if (content.trim()) hasContentOrImage = true;
           postDataPerPlatform[platform] = content;
         });
+        if (!hasContentOrImage && selectedImageFiles.length === 0) {
+          throw new Error("投稿内容または画像を入力してください");
+        }
       }
 
       const results = await postContent(
@@ -183,14 +186,18 @@ const PostForm: React.FC<PostFormProps> = ({
         };
       });
       showPostResult(resultSummary);
-    } catch (error: any) {
-      showToast(error.message, { type: "error" });
+    } catch (error) {
+      if (error instanceof Error) {
+        showToast(error.message, { type: "error" });
+      } else {
+        showToast("予期しないエラーが発生しました", { type: "error" });
+      }
     } finally {
       setIsPosting(false);
     }
   };
 
-  const showPostResult = (result: any) => {
+  const showPostResult = (result: ResultSummaryTyped) => {
     let msg = "";
     if (result.success) {
       msg = "投稿に成功しました！";
@@ -226,6 +233,50 @@ const PostForm: React.FC<PostFormProps> = ({
       handleSubmit();
     }
   };
+
+  // 画像圧縮ユーティリティ
+  async function compressImage(file: File, maxSize = 1280, quality = 0.8): Promise<File> {
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxSize || height > maxSize) {
+          if (width > height) {
+            height = Math.round((height * maxSize) / width);
+            width = maxSize;
+          } else {
+            width = Math.round((width * maxSize) / height);
+            height = maxSize;
+          }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          canvas.toBlob(
+            (blob) => {
+              if (blob) {
+                const ext = file.type === "image/png" ? "png" : "jpeg";
+                resolve(new File([blob], file.name, { type: `image/${ext}` }));
+              } else {
+                resolve(file);
+              }
+            },
+            file.type === "image/png" ? "image/png" : "image/jpeg",
+            quality,
+          );
+        } else {
+          resolve(file);
+        }
+        URL.revokeObjectURL(url);
+      };
+      img.onerror = () => resolve(file);
+      img.src = url;
+    });
+  }
 
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
@@ -298,6 +349,7 @@ const PostForm: React.FC<PostFormProps> = ({
                       onChange={(e) =>
                         handleIndividualContentChange(platform, e)
                       }
+                      onPaste={handlePaste}
                       onKeyDown={handleKeyDown}
                       maxLength={limit}
                     ></textarea>
@@ -326,7 +378,7 @@ const PostForm: React.FC<PostFormProps> = ({
           onClick={() => document.getElementById(imageInputId)?.click()}
           className="px-4 py-2 rounded-md bg-green-500 text-white hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
         >
-          画像を選択 (最大2枚)
+          画像を選択 (最大4枚)
         </button>
         <div
           id={`${imageInputId}-filename`}
