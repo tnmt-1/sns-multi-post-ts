@@ -29,7 +29,14 @@ export async function postToMastodon({
         });
         const result = await res.json();
         console.log("Mastodon画像アップロードレスポンス:", result);
-        const mediaId = result.id || result.media_id || result.id_str;
+        // 型アサーションで型エラーを回避
+        const mediaResult = result as {
+          id?: string;
+          media_id?: string;
+          id_str?: string;
+        };
+        const mediaId =
+          mediaResult.id || mediaResult.media_id || mediaResult.id_str;
         if (res.ok && mediaId) {
           mediaIds.push(mediaId);
         } else {

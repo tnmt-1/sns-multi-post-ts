@@ -62,8 +62,10 @@ export async function postToX({
         body: form,
       });
       const result = await res.json();
-      if (res.ok && result.media_id_string) {
-        mediaIds.push(result.media_id_string);
+      // 型アサーションで型エラーを回避
+      const uploadResult = result as { media_id_string?: string };
+      if (res.ok && uploadResult.media_id_string) {
+        mediaIds.push(uploadResult.media_id_string);
       } else {
         return {
           success: false,

@@ -26,8 +26,10 @@ export async function postToMisskey({
           body: form,
         });
         const result = await res.json();
-        if (res.ok && result.id) {
-          fileIds.push(result.id);
+        // 型アサーションで型エラーを回避
+        const fileResult = result as { id?: string };
+        if (res.ok && fileResult.id) {
+          fileIds.push(fileResult.id);
         } else {
           return {
             success: false,
