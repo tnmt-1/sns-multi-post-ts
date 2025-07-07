@@ -421,7 +421,7 @@ const PostForm: React.FC<PostFormProps> = ({
         type="button"
         onClick={handleSubmit}
         id={postButtonId}
-        className="w-full mt-6 px-4 py-3 rounded-md bg-blue-500 text-white text-lg font-semibold hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        className={`w-full mt-6 px-4 py-3 rounded-md text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-blue-400 ${isPosting ? "bg-gray-200 text-gray-800 cursor-not-allowed" : "bg-blue-500 text-white hover:bg-blue-600"}`}
         disabled={isPosting}
       >
         {isPosting ? "投稿中..." : "投稿する"}
