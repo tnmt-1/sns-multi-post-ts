@@ -8,25 +8,49 @@ import PostForm from "./components/PostForm";
 
 const App: React.FC = () => {
   // ダーク/ライト切り替え機能を削除
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<string[] | null>(
+    null,
+  );
   const [isPlatformModalOpen, setIsPlatformModalOpen] =
     useState<boolean>(false); // State for modal visibility
   const { showToast, ToastContainer } = useToast();
 
   const { platforms, characterLimits, loading, error } = useApi();
 
+  // Load from localStorage or API on initial render or when platforms change
   useEffect(() => {
-    // APIからプラットフォームが取得できたら、enabledなものをデフォルトで選択状態にする
-    if (Object.keys(platforms).length > 0) {
-      const initialSelected = Object.entries(platforms)
-        .filter(([, info]) => info.enabled)
-        .map(([platform]) => platform);
-      setSelectedPlatforms(initialSelected);
+    if (Object.keys(platforms).length > 0 && selectedPlatforms === null) {
+      // Only initialize if platforms are loaded and selectedPlatforms is still null
+      const savedPlatforms = localStorage.getItem("selectedPlatforms");
+      if (savedPlatforms) {
+        const parsedSavedPlatforms: string[] = JSON.parse(savedPlatforms);
+        // Filter out any saved platforms that are no longer enabled by the API
+        const validSavedPlatforms = parsedSavedPlatforms.filter(
+          (platform) => platforms[platform]?.enabled,
+        );
+        setSelectedPlatforms(validSavedPlatforms);
+      } else {
+        const initialSelected = Object.entries(platforms)
+          .filter(([, info]) => info.enabled)
+          .map(([platform]) => platform);
+        setSelectedPlatforms(initialSelected);
+      }
     }
-  }, [platforms]);
+  }, [platforms, selectedPlatforms]); // Add selectedPlatforms to dependencies
+
+  // Save selectedPlatforms to localStorage whenever it changes (and is not null)
+  useEffect(() => {
+    if (selectedPlatforms !== null) {
+      localStorage.setItem(
+        "selectedPlatforms",
+        JSON.stringify(selectedPlatforms),
+      );
+    }
+  }, [selectedPlatforms]);
 
   const handlePlatformToggle = (platform: string) => {
     setSelectedPlatforms((prevSelected) => {
+      if (prevSelected === null) return [platform]; // Should not happen if initialized correctly
       if (prevSelected.includes(platform)) {
         return prevSelected.filter((p) => p !== platform);
       } else {
@@ -35,7 +59,7 @@ const App: React.FC = () => {
     });
   };
 
-  if (loading) {
+  if (loading || selectedPlatforms === null) {
     return (
       <div className="min-h-screen bg-gray-100 text-gray-900 flex items-center justify-center">
         <p className="text-xl">Loading...</p>

@@ -3,7 +3,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { postContent } from "./hooks/useApi";
 
 interface PostFormProps {
-  selectedPlatforms: string[];
+  selectedPlatforms: string[] | null;
   characterLimits: { [key: string]: number };
   showToast: (
     message: string,
@@ -60,7 +60,7 @@ const PostForm: React.FC<PostFormProps> = ({
 
   // unifiedContentの変更をindividualContentsに同期
   useEffect(() => {
-    if (postMode === "individual") {
+    if (postMode === "individual" && selectedPlatforms !== null) {
       const newIndividualContents: { [key: string]: string } = {};
       selectedPlatforms.forEach((platform) => {
         newIndividualContents[platform] = unifiedContent;
@@ -93,7 +93,8 @@ const PostForm: React.FC<PostFormProps> = ({
   };
 
   const getUnifiedCharLimit = () => {
-    if (selectedPlatforms.length === 0) return 3000; // デフォルト値
+    if (selectedPlatforms === null || selectedPlatforms.length === 0)
+      return 3000; // デフォルト値
     let min = 3000;
     selectedPlatforms.forEach((platform) => {
       if (characterLimits[platform] && characterLimits[platform] < min) {
@@ -146,7 +147,7 @@ const PostForm: React.FC<PostFormProps> = ({
   const handleSubmit = async () => {
     setIsPosting(true);
     try {
-      if (selectedPlatforms.length === 0) {
+      if (selectedPlatforms === null || selectedPlatforms.length === 0) {
         throw new Error("投稿先のSNSを選択してください");
       }
 
@@ -160,18 +161,20 @@ const PostForm: React.FC<PostFormProps> = ({
         });
       } else {
         let hasContentOrImage = false;
-        selectedPlatforms.forEach((platform) => {
-          const content = individualContents[platform] || "";
-          if (content.trim()) hasContentOrImage = true;
-          postDataPerPlatform[platform] = content;
-        });
+        if (selectedPlatforms !== null) {
+          selectedPlatforms.forEach((platform) => {
+            const content = individualContents[platform] || "";
+            if (content.trim()) hasContentOrImage = true;
+            postDataPerPlatform[platform] = content;
+          });
+        }
         if (!hasContentOrImage && selectedImageFiles.length === 0) {
           throw new Error("投稿内容または画像を入力してください");
         }
       }
 
       const results = await postContent(
-        selectedPlatforms,
+        selectedPlatforms || [], // Pass an empty array if null
         postDataPerPlatform,
         selectedImageFiles,
       );
@@ -323,7 +326,7 @@ const PostForm: React.FC<PostFormProps> = ({
       )}
       {postMode === "individual" && (
         <div id={individualModeId}>
-          {selectedPlatforms.length === 0 ? (
+          {selectedPlatforms === null || selectedPlatforms.length === 0 ? (
             <p className="text-gray-600">投稿先のSNSを選択してください</p>
           ) : (
             selectedPlatforms.map((platform) => {

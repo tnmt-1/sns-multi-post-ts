@@ -7,7 +7,7 @@ interface PlatformInfo {
 
 interface PlatformSelectorProps {
   platforms: { [key: string]: PlatformInfo };
-  selectedPlatforms: string[];
+  selectedPlatforms: string[] | null;
   onPlatformToggle: (platform: string) => void;
 }
 
@@ -31,7 +31,7 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
             className={`platform-card p-4 rounded-lg border-2 transition-all duration-200 text-left
               ${
                 info.enabled
-                  ? selectedPlatforms.includes(platform)
+                  ? selectedPlatforms?.includes(platform)
                     ? "border-blue-500 bg-blue-50 cursor-pointer"
                     : "border-gray-300 hover:border-blue-400 cursor-pointer"
                   : "border-gray-200 bg-gray-100 opacity-60 cursor-not-allowed"
@@ -44,7 +44,7 @@ const PlatformSelector: React.FC<PlatformSelectorProps> = ({
               }
             }}
             disabled={!info.enabled}
-            aria-pressed={selectedPlatforms.includes(platform)}
+            aria-pressed={selectedPlatforms?.includes(platform) || false}
             tabIndex={info.enabled ? 0 : -1}
           >
             <div className="platform-name text-lg font-medium capitalize">
