@@ -12,6 +12,12 @@ import { postToX } from "./x";
 const app = new Hono<{ Bindings: Env }>();
 const api = new Hono<{ Bindings: Env }>();
 
+// Add X-Robots-Tag: noindex to all responses
+app.use("*", async (c, next) => {
+  await next();
+  c.res.headers.set("X-Robots-Tag", "noindex");
+});
+
 // CORS有効化
 api.use("*", cors());
 
