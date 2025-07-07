@@ -38,9 +38,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
           &times;
         </button>
         {title && (
-          <h2 className="text-2xl font-semibold mb-4 text-gray-900">
-            {title}
-          </h2>
+          <h2 className="text-2xl font-semibold mb-4 text-gray-900">{title}</h2>
         )}
         {children}
       </div>
