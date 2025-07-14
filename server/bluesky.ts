@@ -1,6 +1,6 @@
 // Bluesky投稿用ユーティリティ
 // Cloudflare Workersでfetchを使ってBluesky APIに投稿
-import { AtpAgent } from "@atproto/api";
+import { AtpAgent, RichText } from "@atproto/api";
 
 export async function postToBluesky({
   identifier,
@@ -18,6 +18,9 @@ export async function postToBluesky({
   try {
     const agent = new AtpAgent({ service: "https://bsky.social" });
     await agent.login({ identifier, password });
+
+    const richText = new RichText({ text });
+    await richText.detectFacets(agent); // For mentions and links
 
     let embed:
       | { $type: string; images: Array<{ image: unknown; alt: string }> }
@@ -47,7 +50,8 @@ export async function postToBluesky({
 
     const postRes = await agent.post({
       $type: "app.bsky.feed.post",
-      text,
+      text: richText.text,
+      facets: richText.facets,
       createdAt: new Date().toISOString(),
       embed,
     });
