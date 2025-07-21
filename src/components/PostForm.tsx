@@ -242,7 +242,7 @@ const PostForm: React.FC<PostFormProps> = ({
   // 画像圧縮ユーティリティ
   async function compressImage(
     file: File,
-    maxSize = 1280,
+    maxSize = 960,
     quality = 0.8,
   ): Promise<File> {
     return new Promise((resolve) => {
